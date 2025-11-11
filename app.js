@@ -20,7 +20,13 @@ const listingsRouter = require("./routes/listing");
 const reviewsRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 
-const dbUrl = process.env.MONGO_URL;
+
+// ✅ Define and verify database URL FIRST
+const dbUrl = process.env.MONGO_URL || process.env.ATLAS_URL;
+if (!dbUrl) {
+  console.error("❌ No MongoDB URL found. Check Render environment variables.");
+  process.exit(1);
+}
 
 // Database Connection
 main()
@@ -39,12 +45,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "/public")));
 
-// Session Store
+// ✅ Create session store correctly
 const store = MongoStore.create({
   mongoUrl: dbUrl,
-  crypto: {
-    secret: process.env.SECRET,
-  },
+  crypto: { secret: process.env.SECRET },
   touchAfter: 24 * 3600,
 });
 
@@ -66,33 +70,3 @@ const sessionOptions = {
 
 app.use(session(sessionOptions));
 app.use(flash());
-
-// Passport Setup
-app.use(passport.initialize());
-app.use(passport.session());
-passport.use(new LocalStrategy(User.authenticate()));
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
-
-// Flash and User Info Middleware
-app.use((req, res, next) => {
-  res.locals.success = req.flash("success");
-  res.locals.error = req.flash("error");
-  res.locals.currUser = req.user;
-  next();
-});
-
-// Routes
-app.get("/", (req, res) => res.redirect("/listings"));
-app.use("/listings", listingsRouter);
-app.use("/listings/:id/reviews", reviewsRouter);
-app.use("/", userRouter);
-
-// Error Handling
-app.use((err, req, res, next) => {
-  const { statusCode = 500, message = "Something went wrong" } = err;
-  res.status(statusCode).render("error.ejs", { message });
-});
-
-// Server
-app.listen(8080, () => console.log("🚀 Server running on port 8080"));
