@@ -6,29 +6,22 @@ const reviewSchema = new Schema({
     type: Number,
     min: 1,
     max: 5,
-    required: true
+    required: true,
   },
   comment: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
   },
   createdAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
-  
-
- reviews: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "Review"
-    }
-  ],
-  
+  // ✅ each review belongs to one user
   author: {
     type: Schema.Types.ObjectId,
     ref: "User",
-  }
-  });
+  },
+});
+
 module.exports = mongoose.model("Review", reviewSchema);

@@ -1,60 +1,20 @@
 const express = require("express");
 const router = express.Router();
 const wrapAsync = require("../utils/wrapAsync.js");
-const { isLoggedIn, isOwner } = require("../middleware.js");
-const multer = require("multer");
-const { storage } = require("../cloudConfig.js");
-const upload = multer({ storage });
 const listings = require("../controllers/listings.js");
+const reviewRouter = require("./review.js");
+const { isLoggedIn, isOwner, validateListing } = require("../middleware.js");
 
-// INDEX
-router
-  .route("/")
-  .get(wrapAsync(listings.indexlisting))
-  .post(
-    isLoggedIn,
-    upload.single("listing[image]"),
-    wrapAsync(listings.createlisting)
-  );
+// ✅ Correct nested reviews mount
+router.use("/:id/reviews", reviewRouter);
 
-// SEARCH
-router.get("/search", wrapAsync(listings.searchListing));
-router.get("/search", wrapAsync(listings.searchListing));
-
-// NEW FORM
+// ✅ All valid routes
+router.get("/", wrapAsync(listings.index));
 router.get("/new", isLoggedIn, listings.renderNewForm);
-
-// SHOW / EDIT / UPDATE / DELETE
-router
-  .route("/:id")
-  .get(wrapAsync(listings.showlisting))
-  .put(
-    isLoggedIn,
-    isOwner,
-    upload.single("listing[image]"),
-    wrapAsync(listings.updatelisting)
-  )
-  .delete(isLoggedIn, isOwner, wrapAsync(listings.deletelisting));
-
+router.post("/", isLoggedIn, validateListing, wrapAsync(listings.createListing));
+router.get("/:id", wrapAsync(listings.showListing));
 router.get("/:id/edit", isLoggedIn, isOwner, wrapAsync(listings.editlisting));
-
-
-const Listing = require("../models/listing.js");
-
-module.exports.searchListing = async (req, res) => {
-  const query = req.query.q || "";
-  let listings = [];
-
-  if (query.trim() !== "") {
-    listings = await Listing.find({
-      title: { $regex: query, $options: "i" },
-    });
-  } else {
-    listings = await Listing.find();
-  }
-
-  res.render("listings/index", { listings, query });
-};
-
+router.put("/:id", isLoggedIn, isOwner, validateListing, wrapAsync(listings.updateListing));
+router.delete("/:id", isLoggedIn, isOwner, wrapAsync(listings.deleteListing));
 
 module.exports = router;
