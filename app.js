@@ -86,8 +86,13 @@ app.use((req, res, next) => {
 app.use("/listings", listingsRouter);
 app.use("/", userRouter);
 
+
 // 10. Health Route for Render
 app.get("/_health", (req, res) => res.status(200).send("ok"));
+
+app.get("/", (req, res) => {
+  res.redirect("/listings");
+});
 
 app.use((err, req, res, next) => {
   const { statusCode = 500 } = err;
