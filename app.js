@@ -1,4 +1,3 @@
-// 1. Imports
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
@@ -16,42 +15,38 @@ const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user.js");
+const listEndpoints = require("express-list-endpoints");
 
-// 2. Routers
+// Routers
 const listingsRouter = require("./routes/listing");
 const userRouter = require("./routes/user.js");
 
-// 3. Database URL
+// Database connection
 const dbUrl = process.env.MONGO_URL || process.env.ATLAS_URL;
 if (!dbUrl) {
   console.error("❌ No MongoDB URL found. Check environment variables.");
   process.exit(1);
 }
-
-// 4. Database Connection
 mongoose
   .connect(dbUrl)
   .then(() => console.log("✅ Connected to MongoDB Atlas"))
   .catch((err) => console.log("❌ DB Connection Error:", err));
 
-// 5. View Engine & Middleware
+// View engine and middleware
 app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
-
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
 
-// 6. Session Store
+// Session config
 const store = MongoStore.create({
   mongoUrl: dbUrl,
   crypto: { secret: process.env.SECRET || "defaultsecret" },
   touchAfter: 24 * 3600,
 });
-
 store.on("error", (err) => console.log("❌ SESSION STORE ERROR:", err));
-
 const sessionOptions = {
   store,
   secret: process.env.SECRET || "defaultsecret",
@@ -63,18 +58,17 @@ const sessionOptions = {
     httpOnly: true,
   },
 };
-
 app.use(session(sessionOptions));
 app.use(flash());
 
-// 7. Passport Configuration
+// Passport config
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-// 8. Global Locals for Flash Messages
+// Flash locals
 app.use((req, res, next) => {
   res.locals.currentUser = req.user;
   res.locals.success = req.flash("success");
@@ -82,29 +76,22 @@ app.use((req, res, next) => {
   next();
 });
 
-// 9. Mount Routers
+// Routers
 app.use("/listings", listingsRouter);
 app.use("/", userRouter);
 
-
-// 10. Health Route for Render
+app.get("/", (req, res) => res.redirect("/listings"));
 app.get("/_health", (req, res) => res.status(200).send("ok"));
 
-app.get("/", (req, res) => {
-  res.redirect("/listings");
-});
-
+// Error handler
 app.use((err, req, res, next) => {
   const { statusCode = 500 } = err;
   if (!err.message) err.message = "Something went wrong";
   res.status(statusCode).send(err.message);
 });
 
-// 12. Start Server
+// Start
 const PORT = process.env.PORT || 3000;
-const listEndpoints = require("express-list-endpoints");
+app.listen(PORT, () => console.log(`🚀 Server running on localhost:${PORT}`));
 console.log("🧩 Registered routes:");
 console.log(listEndpoints(app));
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
-});

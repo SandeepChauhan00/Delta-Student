@@ -1,20 +1,20 @@
 const express = require("express");
 const router = express.Router();
-const wrapAsync = require("../utils/wrapAsync.js");
-const listings = require("../controllers/listings.js");
-const reviewRouter = require("./review.js");
-const { isLoggedIn, isOwner, validateListing } = require("../middleware.js");
+const wrapAsync = require("../utils/wrapAsync");
+const listings = require("../controllers/listings");
+const { isLoggedIn, isOwner, validateListing } = require("../middleware");
 
-// ✅ Correct nested reviews mount
-router.use("/:id/reviews", reviewRouter);
-
-// ✅ All valid routes
-router.get("/", wrapAsync(listings.index));
+// ✅ specific routes first
+router.get("/search", wrapAsync(listings.searchListing));
 router.get("/new", isLoggedIn, listings.renderNewForm);
+
+// ✅ then routes with dynamic params
+router.get("/", wrapAsync(listings.index));
 router.post("/", isLoggedIn, validateListing, wrapAsync(listings.createListing));
 router.get("/:id", wrapAsync(listings.showListing));
-router.get("/:id/edit", isLoggedIn, isOwner, wrapAsync(listings.editlisting));
+router.get("/:id/edit", isLoggedIn, isOwner, wrapAsync(listings.editListing));
 router.put("/:id", isLoggedIn, isOwner, validateListing, wrapAsync(listings.updateListing));
 router.delete("/:id", isLoggedIn, isOwner, wrapAsync(listings.deleteListing));
+
 
 module.exports = router;

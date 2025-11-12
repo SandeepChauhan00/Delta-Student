@@ -34,10 +34,11 @@ const listingSchema = new Schema({
 
   // optional field for category (used by your filter icons)
   category: {
-    type: String,
-    enum: ["trending", "rooms", "city", "mountain", "castle", "pool", "camp", "farm", "dome", "boat"],
-    default: "trending"
-  },
+  type: String,
+  enum: ["rooms", "mountain", "city", "castle", "pool", "camp", "farm", "dome", "boat", "trending"],
+  required: true
+}
+,
 
   // link reviews
   reviews: [
