@@ -31,5 +31,23 @@
     integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" 
     crossorigin="anonymous"></script>
     <script src="/js/script.js"></script>
+
+  <script>
+  const toggleBtn = document.querySelector(".dark-toggle");
+  const currentTheme = localStorage.getItem("theme");
+
+  // Apply saved theme
+  if (currentTheme === "dark") document.body.classList.add("dark-mode");
+
+  // Toggle theme on click
+  toggleBtn?.addEventListener("click", () => {
+    document.body.classList.toggle("dark-mode");
+    const theme = document.body.classList.contains("dark-mode") ? "dark" : "light";
+    localStorage.setItem("theme", theme);
+  });
+</script>
+
+
+
 </body> 
 </html>

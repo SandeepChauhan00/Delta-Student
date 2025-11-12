@@ -17,6 +17,38 @@
     padding: 0.5rem 3rem 0.5rem 3rem;
     font-size: 1rem;
   }
+
+  .dark-toggle{
+    margin-right: 10px;
+    margin-top: 7px;
+    font-size: 20px;
+    border: none;
+    background-color: white;
+  }
+
+  body.dark-mode {
+    background-color: #121212;
+    color: #e4e4e4;
+  }
+
+  body.dark-mode .navbar,
+  body.dark-mode footer,
+  body.dark-mode .card {
+    background-color: #1e1e1e !important;
+    color: #e4e4e4;
+  }
+
+  body.dark-mode a {
+    color: #90caf9 !important;
+  }
+
+  .dark-toggle {
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: inherit;
+  }
+
 </style>
 
 <nav class="navbar navbar-expand-md bg-body-light border-bottom sticky-top">
@@ -57,8 +89,14 @@
           </button>
         </form>
       </div>
+    
 
       <div class="navbar-nav ms-auto">
+
+          <button class="dark-toggle">
+            <i class="fa-solid fa-circle-half-stroke"></i>
+          </button>
+       
         <a class="nav-link" href="/listings/new">Airbnb your home</a>
         <% if (!currentUser) { %>
           <a class="nav-link" href="/signup"><b>Sign up</b></a>
